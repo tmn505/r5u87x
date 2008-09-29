@@ -21,6 +21,25 @@
 #ifndef _LOADER_H_
 #define _LOADER_H_
 
+#define TIMEOUT 1000
 
+#define loader_msg(args...)  printf (args)
+#define loader_warn(args...)  printf (args)
+#define loader_error(args...)  ({printf (args); exit (-1); })
+
+struct device_info {
+    int usb_vendor;
+    int usb_product;
+};
+
+struct usb_device * find_device (const struct device_info devices[]);
+
+/*
+ * Please try to keep this in sync with docs/model_matrix.txt!
+ */
+static const struct device_info device_table[] = {
+    { 0x05ca, 0x183a },
+    { }
+};
 
 #endif
