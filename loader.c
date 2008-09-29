@@ -1,5 +1,5 @@
 /*
- * Ricoh 5U87x series USB firmware loader.
+ * Ricoh R5U87x series USB firmware loader.
  * Copyright (c) 2008 Alexander Hixon <alex@alexhixon.com>
  * 
  * Loading routines based off those used in the original r5u870 kernel
