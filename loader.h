@@ -18,6 +18,8 @@
  * MA 02110-1301, USA
  */
 
+#include <glib.h>
+
 #ifndef _LOADER_H_
 #define _LOADER_H_
 
