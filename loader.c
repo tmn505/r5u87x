@@ -100,8 +100,8 @@ find_device (const struct device_info devices[], gint *version) {
 
 gint
 r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
-    gint length, remaining, address, index, res, requesttype = 0;
-    unsigned char header[3], payload[1024];
+    gint length, remaining, address, index, res;
+    char header[3], payload[1024];
     
     index = 0;
     remaining = size;
@@ -159,6 +159,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
     return 0;
 }
 
+gint
 r5u87x_ucode_status (struct usb_dev_handle *handle) {
     gchar buf[1];
     gint res;
@@ -175,6 +176,7 @@ r5u87x_ucode_status (struct usb_dev_handle *handle) {
     return buf[0] == 1 ? TRUE : FALSE;
 }
 
+gint
 r5u87x_ucode_version (struct usb_dev_handle *handle, gint *version) {
     gchar buf[2];
     gint res;
