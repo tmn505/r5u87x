@@ -16,4 +16,4 @@ VID     PID     Chipset Type    Name                                        Note
 0x05CA  0x1841  R5U870  UVC     Fujitsu F01                                 
 0x05CA  0x1870  R5U870  WDM     HP Pavilion Webcam / HP Webcam 1000         VID/PID combination used by two distinct devices. dv1xxx appears to be
                                                                             the less common of the two. The only way to check the difference is to
-                                                                            read the model number out via DMI. 
+                                                                            read the model number out via DMI.

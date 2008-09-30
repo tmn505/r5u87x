@@ -69,7 +69,8 @@ replace_str(gchar *str, gchar *orig, gchar *rep)
 
 struct usb_device *
 find_device (const struct device_info devices[], gint *version) {
-    gint i;
+    struct device_info devinfo;
+    gint i = 0;
     struct usb_bus *busses;
     struct usb_bus *bus;
     
@@ -78,14 +79,19 @@ find_device (const struct device_info devices[], gint *version) {
         struct usb_device *dev;
         
         for (dev = bus->devices; dev; dev = dev->next) {
-            for (i = 0; i < sizeof (devices); i++) {
-                if (dev->descriptor.idVendor == devices[i].usb_vendor &&
-                    dev->descriptor.idProduct == devices[i].usb_product) {
+            do {
+                devinfo = devices[i];
+                if (dev->descriptor.idVendor == devinfo.usb_vendor &&
+                    dev->descriptor.idProduct == devinfo.usb_product) {
                     
-                    *version = devices[i].ucode_version;
+                    *version = devinfo.ucode_version;
                     return dev;
                 }
-            }
+                
+                i++;
+            } while (devinfo.usb_vendor != 0);
+            
+            i = 0;
         }
     }
     
