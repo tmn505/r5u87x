@@ -217,6 +217,8 @@ r5u87x_ucode_clear (struct usb_dev_handle *handle) {
     gint res;
     buf[0] = 1;
     res = usb_control_msg (handle, USB_SEND, 0xa6, 0, 0, buf, 1, TIMEOUT);
+    
+    // Windows driver liked to do a bit of zzz, so we do too.
     if (!res) {
         sleep (200);
     }
