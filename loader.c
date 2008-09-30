@@ -101,7 +101,7 @@ find_device (const struct device_info devices[], gint *version) {
 gint
 r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
     gint length, remaining, address, index, res;
-    char header[3], payload[1024];
+    unsigned char header[3], payload[1024];
     
     index = 0;
     remaining = size;
