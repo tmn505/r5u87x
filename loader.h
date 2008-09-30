@@ -24,21 +24,26 @@
 #define TIMEOUT 1000
 
 #define loader_msg(args...)  printf (args)
-#define loader_warn(args...)  printf (args)
-#define loader_error(args...)  ({printf (args); exit (-1); })
+#define loader_warn(args...)  ({printf ("Warning: "); printf (args);})
+#define loader_error(args...)  ({printf ("\nError: "); printf (args); exit (-1); })
+
+#define USB_SEND USB_ENDPOINT_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE
+#define USB_RECV USB_ENDPOINT_IN | USB_TYPE_VENDOR | USB_RECIP_DEVICE
 
 struct device_info {
     int usb_vendor;
     int usb_product;
+    int ucode_version;
 };
 
-struct usb_device * find_device (const struct device_info devices[]);
+struct usb_device * find_device (const struct device_info devices[], gint *version);
 
 /*
- * Please try to keep this in sync with docs/model_matrix.txt!
+ * Please try to keep this in sync with docs/model_matrix.txt and
+ * docs/firmware_matrix.txt
  */
 static const struct device_info device_table[] = {
-    { 0x05ca, 0x183a },
+    { 0x05ca, 0x183a, 0x0111 },
     { }
 };
 
