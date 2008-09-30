@@ -293,6 +293,7 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
             return res;
         } else if (dev_version != ucode_version) {
             // Clear it out - ucode version and device version don't match.
+            loader_warn ("Microcode versions don't match, clearing.\n");
             res = r5u87x_ucode_clear (handle);
             if (res < 0) {
                 return res;
@@ -333,7 +334,7 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
         } else if (dev_version != ucode_version) {
             loader_warn ("Camera returned unexpected ucode version 0x%04x - "
                 "expected 0x%04x\n", dev_version, ucode_version);
-            return -EPROTO;
+            return -1;
         }
     } else {
         loader_warn ("Skipping enabling of microcode and version checks; in "

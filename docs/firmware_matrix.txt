@@ -14,7 +14,7 @@ VID     PID     Firmware name           Microcode version   Type    Notes
 0x05CA  0x1836  r5u87x-05ca-1836.fw     0x0115              UVC
 0x05CA  0x1839  r5u87x-05ca-1839.fw     0x0113              UVC
 0x05CA  0x183a  r5u87x-05ca-183a.fw     0x0111              UVC
-0x05CA  0x183b  r5u87x-05ca-183b.fw     0x0131              UVC
+0x05CA  0x183b  r5u87x-05ca-183b.fw     0x0311              UVC
 0x05CA  0x183e  r5u87x-05ca-183e.fw     0x0100              UVC
 0x05CA  0x1841  r5u87x-05ca-1841.fw     0x0103              UVC
 0x05CA  0x1870  r5u87x-05ca-1870_1.fw   0x0100              WDM     Used for HP Webcam 1000
