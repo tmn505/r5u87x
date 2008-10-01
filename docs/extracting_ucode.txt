@@ -12,8 +12,14 @@ There are several options you need to change in the scheme file. Generally,
 the Windows driver files are name "R5U870FLx86.sys". If this is not the case, 
 update this on line 16 of the file. 
 
-You'll also need to update the destination filename (line 18). Once this is 
-done, give it an initial run (you'll need Guile installed):
+You'll also need to update the destination filename (line 18).
+
+Now, open up your .sys file in a text editor, and look for the line ".pdb". It
+should be around offset 0xAE96 or so (which is probably about the middle of
+the file). Find the location of 0x40 0x00 (or 0x08) 0x80 as decimal, and put
+that in as the 'start' parameter (line 20).
+
+Once you've done that, give it an initial run (you'll need Guile installed):
  $ ./recode-fw.scm
 
 Checking output
@@ -23,6 +29,9 @@ The tool should do a good job cleaning up any crap data at the end of the
 firmware file. You may need to increase the length, however. If you get an
 error about Wrong type argument, try decreasing/increasing the "length"
 argument in the script.
+
+Hopefully also when you ran the script that you got a few 0 -> 0; lines. If
+not, increase the "length" argument as well.
 
 It's also preferable that you check that your decoded firmware file starts with
 the correct data. Generally, the first triplet should look like:
