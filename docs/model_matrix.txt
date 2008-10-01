@@ -1,5 +1,6 @@
 VID     PID     Chipset Type    Name                                        Notes
 
+0x05CA  0x1803  R5U870  UVC     Flybook V5                                  
 0x05CA  0x1810  R5U870  UVC     HP Pavilion Webcam                          
 0x05CA  0x1812  Unknown UVC     HP Pavilion Webcam                          Used on HP Pavilion DV6502AU laptops. Apparently does not require ucode.
 0x05CA  0x1830  R5U870  WDM     Sony Visual Communication Camera VGP-VCC2   Used on Sony VAIO SZ laptops.
