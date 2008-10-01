@@ -4,7 +4,7 @@ with microcode versions at or below 0x0100?
 
 VID     PID     Firmware name           Microcode version   Type    Notes
 
-0x05CA  0x1810  r5u87x-05ca-1810.fw     0x0115              UVC
+0x05CA  0x1810  r5u87x-05ca-1810.fw     0x0151              UVC
 0x05CA  0x1812  r5u87x-05ca-1812.fw     ??????              UVC     Unused? Start of ucode seems to be missing?
 0x05CA  0x1830  r5u87x-05ca-1830.fw     0x0100              WDM
 0x05CA  0x1832  r5u87x-05ca-1832.fw     0x0100              WDM

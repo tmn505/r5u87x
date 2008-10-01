@@ -46,7 +46,7 @@ find_device (const struct device_info devices[], gint *version);
  * docs/firmware_matrix.txt
  */
 static const struct device_info device_table[] = {
-    { 0x05CA, 0x1810, 0x0115 },
+    { 0x05CA, 0x1810, 0x0151 },
     { 0x05CA, 0x1830, 0x0100 },
     { 0x05CA, 0x1832, 0x0100 },
     { 0x05CA, 0x1833, 0x0100 },
