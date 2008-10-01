@@ -1,7 +1,7 @@
 LIBS=`pkg-config --libs glib-2.0 libusb`
 INCS=`pkg-config --cflags glib-2.0 libusb`
 
-.c.o:   loader.h
+.c.o:
 	$(CC) -g -Wall $(CFLAGS) $(INCS) -c $*.c $*.h
 
 all: loader
@@ -11,3 +11,5 @@ loader: loader.o
 
 clean:
 	rm -fr *.o loader
+	rm -fr *.gch loader
+	rm *~
