@@ -111,7 +111,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
     while (remaining > 0) {
         if (remaining < 3) {
             loader_warn ("Microcode file is incomplete; message %d\n", index);
-            return -1;
+            return -EBADMSG;
         }
         
         // load in packet header
@@ -274,19 +274,11 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
         loader_warn ("Failed to open USB device.\n");
     }
     
-    // Force reset if asked.
-    if (force_clear) {
-        res = r5u87x_ucode_clear (handle);
-        if (res < 0) {
-            return res;
-        }
-    }
-    
     // Check to see if there's already stuff on there.
     res = r5u87x_ucode_status (handle);
     if (res < 0) {
         return res;
-    } else if (res == 1) {
+    } else if (res == 1 && !force_clear) {
         // Microcode already uploaded.
         res = r5u87x_ucode_version (handle, &dev_version);
         if (res < 0) {
@@ -311,6 +303,14 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
             loader_msg ("Not doing anything - camera already setup.\n");
             return 0;
         }
+    } else if (res == 1 && force_clear) {
+        // Force reset if asked.
+        res = r5u87x_ucode_clear (handle);
+        if (res < 0) {
+            return res;
+        }
+    } else if (force_clear) {
+        loader_warn ("Not force-clearing because the device has no ucode.\n");
     }
     
     // Upload the microcode!
@@ -334,7 +334,7 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
         } else if (dev_version != ucode_version) {
             loader_warn ("Camera returned unexpected ucode version 0x%04x - "
                 "expected 0x%04x\n", dev_version, ucode_version);
-            return -1;
+            return -EBADMSG;
         }
     } else {
         loader_warn ("Skipping enabling of microcode and version checks; in "
@@ -376,8 +376,9 @@ main (gint argc, gchar *argv []) {
     
     int res = load_firmware (dev, firmware, version);
     if (res < 0) {
-        loader_error ("Failed to upload firmware to device: %s (code %d).\n",
-            strerror (errno), res);
+        loader_error ("Failed to upload firmware to device: %s (code %d).\n%s",
+            strerror (errno), res,
+            res == -1 ? "Try running as root?\n" : "");
     } else {
         loader_msg ("\nSuccessfully uploaded firmware to device %04x:%04x!\n",
             dev->descriptor.idVendor, dev->descriptor.idProduct);
