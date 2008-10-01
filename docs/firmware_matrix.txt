@@ -18,6 +18,6 @@ VID     PID     Firmware name           Microcode version   Type    Notes
 0x05CA  0x183a  r5u87x-05ca-183a.fw     0x0111              UVC
 0x05CA  0x183b  r5u87x-05ca-183b.fw     0x0311              UVC
 0x05CA  0x183e  r5u87x-05ca-183e.fw     0x0100              UVC     Very different looking ucode structure. R5U875? Broken?
-0x05CA  0x1841  r5u87x-05ca-1841.fw     0x0103              UVC
+0x05CA  0x1841  r5u87x-05ca-1841.fw     0x0103              UVC     Apparently broken.
 0x05CA  0x1870  r5u87x-05ca-1870_1.fw   0x0100              WDM     Used for HP Webcam 1000
 0x05CA  0x1870  r5u87x-05ca-1870.fw     0x0112              WDM     Used for HP Pavilion dv1xxxx
