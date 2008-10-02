@@ -312,9 +312,15 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
     } else if (res == 1 && !force_clear) {
         // Microcode already uploaded.
         res = r5u87x_ucode_version (handle, &dev_version);
+        if (dev_version == 0x0001) {
+            loader_warn ("Bad version returned. You appear to be running a "
+            "WDM device.\nSee http://www.bitbucket.org/ahixon/r5u87x/issue/6 "
+            "for more information.\nSkipping clear for testing.\n");
+        }
+        
         if (res < 0) {
             return res;
-        } else if (dev_version != ucode_version) {
+        } else if (dev_version != ucode_version && dev_version != 0x0001) {
             // Clear it out - ucode version and device version don't match.
             loader_warn ("Microcode versions don't match, clearing.\n");
             res = r5u87x_ucode_clear (handle);
