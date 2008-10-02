@@ -35,6 +35,9 @@ static gchar    *firmware       = "ucode/r5u87x-%vid%-%pid%.fw";
 static gboolean force_clear     = FALSE;
 static gboolean no_load         = FALSE;
 
+static gchar    *dump           = "dump.bin";
+static gboolean dump_ucode      = FALSE;
+
 static GOptionEntry entries[] = {
     { "firmware", 'f', 0,
         G_OPTION_ARG_FILENAME, &firmware,
@@ -47,6 +50,14 @@ static GOptionEntry entries[] = {
     { "pretend", 0, 0,
         G_OPTION_ARG_NONE, &no_load,
         "Don't actually load any microcode on to the device.", NULL
+    },
+    { "dump-ucode", 0, 0,
+        G_OPTION_ARG_NONE, &dump_ucode,
+        "Dump microcode to compiled code.", NULL
+    },
+    { "dump-path", 0, 0,
+        G_OPTION_ARG_FILENAME, &dump,
+        "Path to dump compiled code to.", NULL
     },
 };
 
@@ -103,10 +114,19 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
     gint length, remaining, address, index, res;
     unsigned char header[3], payload[1024];
     
+    gint dump_fd;
+    
     index = 0;
     remaining = size;
     
     loader_msg ("Sending microcode to camera...\n");
+    
+    if (dump_ucode) {
+        loader_msg ("Dumping microcode to %s\n", dump);
+        if ((dump_fd = g_open (dump, O_WRONLY)) == -1) {
+            loader_error ("Failed to open microcode dump.\n");
+        }
+    }
     
     while (remaining > 0) {
         if (remaining < 3) {
@@ -136,6 +156,12 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
             loader_warn ("Failed to read firmware data.\n");
         }
         
+        // If we're dumping, just write the payload
+        if (dump_ucode) {
+            loader_msg ("Wrote %d bytes in message %d\n", length, index);
+            write (dump_fd, payload, length);
+        }
+        
         if (no_load == FALSE) {
             res = usb_control_msg (handle, USB_SEND, 0xa0, address, 0,
                 payload, length, TIMEOUT);
@@ -154,6 +180,11 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
         
         remaining -= length;
         index++;
+    }
+    
+    if (dump_ucode) {
+        loader_msg ("Completed dumping of microcode.\n");
+        close (dump_fd);
     }
     
     return 0;
@@ -187,8 +218,8 @@ r5u87x_ucode_version (struct usb_dev_handle *handle, gint *version) {
         return res;
     }
     
-    // FIXME: This is kinda bad. What about endianness?
-    res = buf[1] | (buf[0] << 4);
+    res = GINT_FROM_LE (buf[0]) << 4;
+    res = res | GINT_FROM_LE (buf[1]);
     
     loader_msg ("Camera reports microcode version 0x%04x.\n", res);
     *version = res;
@@ -315,6 +346,11 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
     
     // Upload the microcode!
     res = r5u87x_ucode_upload (fd, handle, infobuf.st_size);
+    
+    // Close the microcode file
+    close (fd);
+    
+    // and bail out if necessary.
     if (res < 0) {
         return res;
     }
