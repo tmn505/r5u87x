@@ -150,6 +150,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
             return -EBADMSG;
         } else if (read (firmware, payload, length) != length) {
             loader_warn ("Failed to read firmware data.\n");
+            return -EBADMSG;
         }
         
         // If we're dumping, just write the payload
@@ -214,8 +215,7 @@ r5u87x_ucode_version (struct usb_dev_handle *handle, gint *version) {
         return res;
     }
     
-    res = GINT_FROM_LE (buf[0]) << 4;
-    res = res | GINT_FROM_LE (buf[1]);
+    res = (buf[1] << 8) | buf[0];
     
     loader_msg ("Camera reports microcode version 0x%04x.\n", res);
     *version = res;
