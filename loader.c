@@ -35,7 +35,7 @@ static gchar    *firmware       = "ucode/r5u87x-%vid%-%pid%.fw";
 static gboolean force_clear     = FALSE;
 static gboolean no_load         = FALSE;
 
-static gchar    *dump           = "dump.bin";
+static gchar    *dump;
 static gboolean dump_ucode      = FALSE;
 
 static GOptionEntry entries[] = {
@@ -54,10 +54,6 @@ static GOptionEntry entries[] = {
     { "dump-ucode", 0, 0,
         G_OPTION_ARG_NONE, &dump_ucode,
         "Dump microcode to compiled code.", NULL
-    },
-    { "dump-path", 0, 0,
-        G_OPTION_ARG_FILENAME, &dump,
-        "Path to dump compiled code to.", NULL
     },
 };
 
@@ -123,7 +119,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
     
     if (dump_ucode) {
         loader_msg ("Dumping microcode to %s\n", dump);
-        if ((dump_fd = g_open (dump, O_WRONLY | O_CREAT)) == -1) {
+        if ((dump_fd = g_open (dump, O_WRONLY | O_CREAT, 0666)) == -1) {
             loader_error ("Failed to open microcode dump.\n");
         }
     }
@@ -267,11 +263,7 @@ r5u87x_ucode_clear (struct usb_dev_handle *handle) {
 }
 
 gint
-load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
-    const gint ucode_version) {
-    
-    gchar* fw_name;
-    
+load_firmware (struct usb_device *dev, const gint ucode_version) {
     gint fd, res, dev_version;
     usb_dev_handle *handle;
     struct stat infobuf;
@@ -280,23 +272,26 @@ load_firmware (struct usb_device *dev, gchar* firmware_tmpl,
     
     // Convert the template firmware name into one we're going to use for this
     // device.
-    fw_name = replace_str (firmware_tmpl, "%pid%",
+    firmware = replace_str (firmware, "%pid%",
         g_strdup_printf ("%04x", dev->descriptor.idProduct));
-    fw_name = replace_str (fw_name, "%vid%",
+    firmware = replace_str (firmware, "%vid%",
         g_strdup_printf ("%04x", dev->descriptor.idVendor));
+
+    dump = g_strdup_printf ("r5u87x-dump-%04x-%04x.bin",
+        dev->descriptor.idProduct, dev->descriptor.idVendor);
     
     loader_msg ("Found camera   : %04x:%04x\n", dev->descriptor.idVendor,
         dev->descriptor.idProduct);
-    loader_msg ("Firmware       : %s\n\n", fw_name);
+    loader_msg ("Firmware       : %s\n\n", firmware);
     
     // Open the firmware file
-    if ((fd = g_open (fw_name, O_RDONLY)) == -1) {
-        loader_error ("Failed to open %s. Does it exist?\n", fw_name);
+    if ((fd = g_open (firmware, O_RDONLY)) == -1) {
+        loader_error ("Failed to open %s. Does it exist?\n", firmware);
     }
     
     // Possibly not the best way to do this, but hey, it's certainly easy
     // (without loading everything into memory, and compared to seeking around)
-    if (stat (fw_name, &infobuf) == -1) {
+    if (stat (firmware, &infobuf) == -1) {
         loader_error ("Failed to get filesize of firmware.\n");
     }
     
@@ -416,7 +411,7 @@ main (gint argc, gchar *argv []) {
         loader_error ("Failed to find any supported webcams.\n");
     }
     
-    int res = load_firmware (dev, firmware, version);
+    int res = load_firmware (dev, version);
     if (res < 0) {
         loader_error ("Failed to upload firmware to device: %s (code %d).\n%s",
             strerror (errno), res,
