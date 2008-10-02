@@ -14,7 +14,7 @@ VID     PID     Chipset Type    Name                                        Note
 0x05CA  0x183a  R5U870  UVC     Sony Visual Communication Camera VGP-VCC7   Used on Sony VAIO SZ and TZ11 laptops.
 0x05CA  0x183b  R5U870  UVC     Sony Visual Communication Camera VGP-VCC8   Used on Sony VAIO FZ laptops.
 0x05CA  0x183e  R5U870  UVC     Sony Visual Communication Camera VGP-VCC9   Used on Sony VAIO FZ laptops.
-0x05CA  0x1841  R5U870  UVC     Fujitsu F01                                 
+0x05CA  0x1841  R5U870  UVC     Fujitsu F01 / Fujitsu Lifebook U810                                 
 0x05CA  0x1870  R5U870  WDM     HP Pavilion Webcam / HP Webcam 1000         VID/PID combination used by two distinct devices. dv1xxx appears to be
                                                                             the less common of the two. The only way to check the difference is to
                                                                             read the model number out via DMI. Not currently supported by loader.
