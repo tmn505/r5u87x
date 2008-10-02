@@ -123,7 +123,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
     
     if (dump_ucode) {
         loader_msg ("Dumping microcode to %s\n", dump);
-        if ((dump_fd = g_open (dump, O_WRONLY)) == -1) {
+        if ((dump_fd = g_open (dump, O_WRONLY | O_CREAT)) == -1) {
             loader_error ("Failed to open microcode dump.\n");
         }
     }
