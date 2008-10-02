@@ -140,7 +140,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
                 return 0;
             } else {
                 loader_warn ("Reading firmware header chunk failed\n");
-                return -2;
+                return -EBADMSG;
             }
         }
         
@@ -151,7 +151,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
         // Read the payload
         if (length < 0 || length >= 1024) {
             loader_warn ("Bad payload length %d (%i).\n", length, index);
-            return -3;
+            return -EBADMSG;
         } else if (read (firmware, payload, length) != length) {
             loader_warn ("Failed to read firmware data.\n");
         }
