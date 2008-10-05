@@ -55,7 +55,7 @@ static const struct device_info device_table[] = {
     { 0x05CA, 0x1835, 0x0107 },
     { 0x05CA, 0x1836, 0x0151 },
     { 0x05CA, 0x1837, 0x0151 }, // Uses copy of 0x1836 ucode.
-    { 0x05CA, 0x1839, 0x0113 },
+    { 0x05CA, 0x1839, 0x0030 },
     { 0x05CA, 0x183a, 0x0111 },
     { 0x05CA, 0x183b, 0x0131 },
     { 0x05CA, 0x183e, 0x0100 },
@@ -66,7 +66,7 @@ static const struct device_info device_table[] = {
      * to determine which is which yet.
      * 
      * { 0x05CA, 0x1870, 0x0100 },  // Used for HP Webcam 1000      (1870_1.fw)
-     * { 0x05CA  0x1870, 0x0112 },  // Used for HP Pavilion dv1xxxx (1870.fw)
+     * { 0x05CA, 0x1870, 0x0112 },  // Used for HP Pavilion dv1xxxx (1870.fw)
      */
      
      { }

@@ -15,9 +15,9 @@
 ;; the file that contains the firmware 
 (define *driverfile* "R5U870FLx86.sys")
 ;; where to put the result
-(define *destfile* "r5u870_183b.fw")
+(define *destfile* "r5u870_1803.fw")
 ;; start address of firmware data in *DRIVERFILE* 
-(define *start* 46224)
+(define *start* 44688)
 ;; length of data
 (define *length* 16981)
 
