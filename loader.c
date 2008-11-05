@@ -161,7 +161,7 @@ r5u87x_ucode_upload (gint firmware, struct usb_dev_handle *handle, gint size) {
         
         if (no_load == FALSE) {
             res = usb_control_msg (handle, USB_SEND, 0xa0, address, 0,
-                payload, length, TIMEOUT);
+                (char *)payload, length, TIMEOUT);
             
             if (res < 0) {
                 loader_warn ("Command failed. Msg: %d; res: %d\n", index, res);
