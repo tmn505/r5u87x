@@ -31,6 +31,10 @@
 
 #include "loader.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 static gchar    *firmware       = "ucode/r5u87x-%vid%-%pid%.fw";
 static gboolean force_clear     = FALSE;
 static gboolean no_load         = FALSE;
@@ -286,7 +290,15 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
     
     // Open the firmware file
     if ((fd = g_open (firmware, O_RDONLY)) == -1) {
+        #ifdef UCODEDIR
+        firmware = g_build_filename (UCODEDIR, firmware, NULL);
+        //loader_msg ("Trying %s\n", firmware);
+        if ((fd = g_open (firmware, O_RDONLY)) == -1) {
+            loader_error ("Failed to open %s. Does it exist?\n", firmware);
+        }
+        #else
         loader_error ("Failed to open %s. Does it exist?\n", firmware);
+        #endif
     }
     
     // Possibly not the best way to do this, but hey, it's certainly easy
@@ -395,6 +407,12 @@ main (gint argc, gchar *argv []) {
     if (!g_option_context_parse(context, &argc, &argv, &error)) {
         loader_error ("%s\n", error->message);
     }
+    
+    #ifdef VERSION
+    loader_msg ("r5u87x firmware loader v%s\n", VERSION);
+    #else
+    loader_msg ("r5u87x firmware loader (unknown version)\n");
+    #endif
     
     usb_init ();
     if (usb_find_busses () == 0) {
