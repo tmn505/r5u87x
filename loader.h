@@ -48,6 +48,7 @@ find_device (const struct device_info devices[], gint *version);
 static const struct device_info device_table[] = {
     { 0x05CA, 0x1803, 0xFFFF }, // Unknown ucode version.
     { 0x05CA, 0x1810, 0x0115 },
+    /* 05ca:1812 does not require ucode. */
     { 0x05CA, 0x1830, 0x0100 },
     { 0x05CA, 0x1832, 0x0100 },
     { 0x05CA, 0x1833, 0x0100 },
