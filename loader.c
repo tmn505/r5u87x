@@ -41,6 +41,7 @@ static gboolean no_load         = FALSE;
 
 static gchar    *dump;
 static gboolean dump_ucode      = FALSE;
+static gboolean reload          = FALSE;
 
 static GOptionEntry entries[] = {
     { "firmware", 'f', 0,
@@ -59,6 +60,12 @@ static GOptionEntry entries[] = {
         G_OPTION_ARG_NONE, &dump_ucode,
         "Dump microcode to compiled code.", NULL
     },
+#ifdef ENABLE_RELOAD
+    { "reload", 0, 0,
+        G_OPTION_ARG_NONE, &reload,
+        "Reload uvcvideo module when complete.", NULL
+    },
+#endif
 };
 
 gchar *
@@ -266,6 +273,19 @@ r5u87x_ucode_clear (struct usb_dev_handle *handle) {
     return res;
 }
 
+gchar*
+usb_id_printf (gchar* src, struct usb_device *dev) {
+    // Converts the template firmware name into one we're going to use for this
+    // device.
+    
+    src = replace_str (src, "%pid%",
+        g_strdup_printf ("%04x", dev->descriptor.idProduct));
+    src = replace_str (src, "%vid%",
+        g_strdup_printf ("%04x", dev->descriptor.idVendor));
+    
+    return src;
+}
+
 gint
 load_firmware (struct usb_device *dev, const gint ucode_version) {
     gint fd, res, dev_version;
@@ -274,24 +294,19 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
 
     dev_version = 0;
     
-    // Convert the template firmware name into one we're going to use for this
-    // device.
-    firmware = replace_str (firmware, "%pid%",
-        g_strdup_printf ("%04x", dev->descriptor.idProduct));
-    firmware = replace_str (firmware, "%vid%",
-        g_strdup_printf ("%04x", dev->descriptor.idVendor));
+    firmware = usb_id_printf (firmware, dev);
 
     dump = g_strdup_printf ("r5u87x-dump-%04x-%04x.bin",
         dev->descriptor.idProduct, dev->descriptor.idVendor);
     
-    loader_msg ("Found camera   : %04x:%04x\n", dev->descriptor.idVendor,
+    loader_msg ("Found camera: %04x:%04x\n", dev->descriptor.idVendor,
         dev->descriptor.idProduct);
-    loader_msg ("Firmware       : %s\n\n", firmware);
+    //loader_msg ("Firmware       : %s\n\n", firmware);
     
     // Open the firmware file
     if ((fd = g_open (firmware, O_RDONLY)) == -1) {
         #ifdef UCODEDIR
-        firmware = g_build_filename (UCODEDIR, firmware, NULL);
+        firmware = usb_id_printf (UCODEDIR, dev);
         //loader_msg ("Trying %s\n", firmware);
         if ((fd = g_open (firmware, O_RDONLY)) == -1) {
             loader_error ("Failed to open %s. Does it exist?\n", firmware);
@@ -409,9 +424,9 @@ main (gint argc, gchar *argv []) {
     }
     
     #ifdef VERSION
-    loader_msg ("r5u87x firmware loader v%s\n", VERSION);
+    loader_msg ("r5u87x firmware loader v%s\n\n", VERSION);
     #else
-    loader_msg ("r5u87x firmware loader (unknown version)\n");
+    loader_msg ("r5u87x firmware loader (unknown version)\n\n");
     #endif
     
     usb_init ();
@@ -437,6 +452,20 @@ main (gint argc, gchar *argv []) {
     } else {
         loader_msg ("\nSuccessfully uploaded firmware to device %04x:%04x!\n",
             dev->descriptor.idVendor, dev->descriptor.idProduct);
+    }
+    
+    
+    if (reload) {
+        gint status;
+        loader_msg ("Reloading uvcvideo module...\n");
+        status = system ("modprobe -r uvcvideo; modprobe uvcvideo");
+        if (status == -1) {
+            loader_error ("Unable to create shell process.\n");
+        } else if (status == 0) {
+            loader_msg ("Finished.\n");
+        } else {
+            loader_warn ("Recevied non-zero return code: %d.\n", status);
+        }
     }
     
     return 0;
