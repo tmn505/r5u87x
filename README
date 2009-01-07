@@ -1,5 +1,5 @@
 R5U87x Userspace Tools
-Version 0.1.0, 2008/09/30
+Version 0.2.0, 2009/01/07
 
 Introduction
 ============
@@ -22,43 +22,74 @@ To compile the tools, it is required you have the following prerequisites
 installed:
 
  * GCC
- * Make
+ * Automake
  * libusb development packages (libusb-dev or similar)
  * GLib 2.0 development packages (libglib2.0-dev or similar)
 
 Compilation itself is reasonably simple; just run make:
  $ make
+ 
+Installation
+============
+
+If you'd like your system to automatically load the firmware to the camera,
+and then reload the uvcvideo module at boot time, simply run:
+ $ make rules
+ 
+Now you can proceed to installing the tool system-wide:
+ # make install
 
 Usage
 =====
 
 To upload the firmware to your camera, simply run (possibly as root, depending
 on your system):
-  $ ./loader
+  # r5u87x-loader
 
 Do note that this only lasts while the camera still has power to it. Shutting
 down and starting up again will cause the camera to lose its state. Rebooting,
 however, won't.
 
 You may need to reload your kernel module (eg. uvcvideo) for it to notice your
-camera now that it has firmware.
+camera now that it has firmware. You can either get the loader tool to do this
+when it's finished:
+  # r5u87x-loader --reload
+
+at boot time, by following the instructions above (see Installation), or by
+performing it manually:
+  # modprobe -r uvcvideo; modprobe uvcvideo
 
 If your camera appears to be playing up, you can try forcefully resetting it:
-  $ ./loader --force-clear
+  # r5u87x-loader --force-clear
 
 There are also useful arguments for testing, see doc/extracting_ucode.txt
 
 Bugs
 ====
 
-Please, report any bugs by creating a new ticket at 
+The following issues are known already, so please *do not* report them (you
+can, however, subscribe to any of these tickets):
+ * Broken pipe (code 32) - http://www.bitbucket.org/ahixon/r5u87x/issue/6/
+ * Distorted/stripy video - http://www.bitbucket.org/ahixon/r5u87x/issue/17/
+ * HP Pavillion dv9000 or similar aren't detected (make sure you uncomment
+   only *ONE* device, not both) - http://bitbucket.org/ahixon/r5u87x/issue/26/
+ * Upside down video - http://www.bitbucket.org/ahixon/r5u87x/issue/7/
+
+If /dev/video does not exist or applications don't detect a webcam, even though
+the loader reported that the firmware was uploaded fine, please report a bug
+with [WDM OK] in the title.
+
+You should also register, otherwise you may not get notifications of any
+replies to your bug.
+
+Report any bugs by creating a new ticket at 
 http://www.bitbucket.org/ahixon/r5u87x/issues/new/. If possible, make sure
 that the bug you have hasn't already been reported by searching the issue list.
 
 Copyrights and Licenses
 =======================
 
-Copyright (c) 2008 Alexander Hixon <alex@alexhixon.com>
+Copyright (c) 2008-2009 Alexander Hixon <alex@alexhixon.com>
 
 These tools are licensed to you under the terms of the GNU GPL v2.  See
 the included file 'COPYING'.
@@ -73,6 +104,13 @@ Acknowledgements
 Huge kudos to Sam Revitch for writing the original r5u870 driver.
 Additional thanks to those who helped Sam develop the driver.
 
+Many thanks to Willem van Engen for working on getting this included into
+Ubuntu, as well as helping me with my Makefile writing, writing the udev
+template and awk/sed scripts, and creating a Debian package.
+
+Thanks to Gonzalo Alvarez for testing the 1812 driver and providing usbsnoop
+traces of the device.
+
 Thanks to Utz-Uwe Haus for getting the Sony VGP-VCC7 firmware extracted, and
 providing a patch against the original r5u870 driver, and providing the
 recode-fw.scm script.
@@ -81,6 +119,3 @@ Some friendly folk on the Ubuntu Forums for providing extracted version of
 firmwares and their associated version numbers.
 
 Thanks to 'franz' for providing an updated version of 183b driver, and testing.
-
-Thanks to Gonzalo Alvarez for testing the 1812 driver and providing usbsnoop
-traces of the device.
