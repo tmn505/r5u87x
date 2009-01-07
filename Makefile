@@ -1,8 +1,8 @@
-# For build target ---------------------------------------------|
+# For build target -----------------------------------------------------------|
 LIBS=`pkg-config --libs glib-2.0 libusb`
 INCS=`pkg-config --cflags glib-2.0 libusb`
 
-# For install target -------------------------------------------|
+# For install target ---------------------------------------------------------|
 # App to run to install files, usually in path; set otherwise
 INSTALL=install
 
@@ -18,6 +18,8 @@ INSTALL_PATH=$(DESTDIR)/$(PREFIX)
 bindir=/bin
 libdir=/lib
 FIRMWARE_DIR=$(INSTALL_PATH)$(libdir)/r5u87x/ucode/
+
+# Automake targets -----------------------------------------------------------|
 
 .c.o:
 	$(CC) -g -Wall -DHAVE_CONFIG_H $(CFLAGS) $(INCS) -c $*.c $*.h
