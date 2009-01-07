@@ -301,12 +301,12 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
     
     loader_msg ("Found camera: %04x:%04x\n", dev->descriptor.idVendor,
         dev->descriptor.idProduct);
-    //loader_msg ("Firmware       : %s\n\n", firmware);
+    //loader_msg ("Firmware: %s\n\n", firmware);
     
     // Open the firmware file
-    if ((fd = g_open (firmware, O_RDONLY)) == -1) {
-        #ifdef UCODEDIR
-        firmware = usb_id_printf (UCODEDIR, dev);
+    if ((fd = g_open (firmware, O_RDONLY)) != -1) {
+        #ifdef UCODE_PATH
+        firmware = usb_id_printf (UCODE_PATH, dev);
         //loader_msg ("Trying %s\n", firmware);
         if ((fd = g_open (firmware, O_RDONLY)) == -1) {
             loader_error ("Failed to open %s. Does it exist?\n", firmware);

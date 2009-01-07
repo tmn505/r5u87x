@@ -7,22 +7,27 @@ INCS=`pkg-config --cflags glib-2.0 libusb`
 INSTALL=install
 
 # FW data
-FIRMWARE="r5u87x-05ca-1803.fw" "r5u87x-05ca-1810.fw" "r5u87x-05ca-1812.fw" "r5u87x-05ca-1830.fw" "r5u87x-05ca-1832.fw" "r5u87x-05ca-1833.fw" "r5u87x-05ca-1834.fw" "r5u87x-05ca-1835.fw" "r5u87x-05ca-1836.fw" "r5u87x-05ca-1837.fw" "r5u87x-05ca-1839.fw" "r5u87x-05ca-183a.fw" "r5u87x-05ca-183b.fw" "r5u87x-05ca-183e.fw" "r5u87x-05ca-1841.fw" "r5u87x-05ca-1870_1.fw" "r5u87x-05ca-1870.fw"
+FIRMWARE_NAMESPEC="r5u87x-%vid%-%pid%.fw"
+FIRMWARE=`ls ucode | xargs`
 
-# Modification to filenames
+# Install names
 LOADER_INSTALL=r5u87x-loader
+UDEV_INSTALL=/etc/udev/rules.d/
 
 # Directories
 PREFIX=/usr
-INSTALL_PATH=$(DESTDIR)/$(PREFIX)
-bindir=/bin
+INSTALL_PATH=$(DESTDIR)$(PREFIX)
+sbindir=/sbin
 libdir=/lib
-FIRMWARE_DIR=$(INSTALL_PATH)$(libdir)/r5u87x/ucode/
+FIRMWARE_DIR=$(INSTALL_PATH)$(libdir)/r5u87x/ucode
+
+# For rules and make targets -------------------------------------------------|
+RULESFILE=90-r5u87x-loader.rules
 
 # Automake targets -----------------------------------------------------------|
 
 .c.o:
-	$(CC) -g -Wall -DHAVE_CONFIG_H $(CFLAGS) $(INCS) -c $*.c $*.h
+	$(CC) -g -Wall -DHAVE_CONFIG_H -DUCODE_PATH=\"$(FIRMWARE_DIR)/$(FIRMWARE_NAMESPEC)\" $(CFLAGS) $(INCS) -c $*.c $*.h
 
 all: loader
 
@@ -32,17 +37,33 @@ loader: loader.o
 clean:
 	rm -fr *.o loader
 	rm -fr *.gch loader
-	#rm *~
+	if [ -f contrib/$(RULESFILE) ]; then \
+	    rm -f contrib/$(RULESFILE); \
+    fi
 
-install:	all
-	./mkinstalldirs $(INSTALL_PATH)$(bindir)
-	$(INSTALL) -m 0755 loader $(INSTALL_PATH)$(bindir)/$(LOADER_INSTALL)
-	./mkinstalldirs $(FIRMWARE_DIR)
+install: all
+	$(INSTALL) -d $(INSTALL_PATH)$(bindir)
+	$(INSTALL) -m 0755 loader $(INSTALL_PATH)$(sbindir)/$(LOADER_INSTALL)
+	$(INSTALL) -d $(FIRMWARE_DIR)
 	@for fw in $(FIRMWARE); do \
-	    echo "$(INSTALL) -m 0666 ucode/$$fw $(FIRMWARE_DIR)$$fw" ; \
-	    $(INSTALL) -m 0666 ucode/$$fw $(FIRMWARE_DIR)$$fw || exit 1 ; \
-    done
+		echo "$(INSTALL) -m 0644 ucode/$$fw $(FIRMWARE_DIR)/$$fw" ; \
+		$(INSTALL) -m 0644 ucode/$$fw $(FIRMWARE_DIR)/$$fw || exit 1 ; \
+	done
+	
+	## If we have the rules file generated, install it while we're here
+	if [ -f contrib/$(RULESFILE) ]; then \
+		$(INSTALL) -m 0644 $(RULESFILE) $(UDEV_INSTALL); \
+	fi
 
 uninstall:
-	rm -fv $(INSTALL_PATH)$(bindir)/$(LOADER_INSTALL)
+	rm -fv $(INSTALL_PATH)$(sbindir)/$(LOADER_INSTALL)
 	rm -rfv $(INSTALL_PATH)$(libdir)/r5u87x
+
+contrib/$(RULESFILE):
+	cat contrib/$(RULESFILE).in | awk 'BEGIN{P=1;}/^###BEGINTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' >$@
+	for sedline in `ls ucode | sed 's/^r5u87x-\([0-9a-zA-Z]\+\)-\([0-9a-zA-Z]\+\)\.fw$$/s\/#VENDORID#\/\1\/g;s\/#PRODUCTID#\/\2\/g/p;d'`; do \
+		cat contrib/$(RULESFILE).in | awk 'BEGIN{P=0;}/^###BEGINTEMPLATE###/{P=1;}/^###ENDTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' | sed "$$sedline" >>$@; \
+		done >>$(RULESFILE)
+	cat contrib/$(RULESFILE).in | awk 'BEGIN{P=0;}/^###ENDTEMPLATE###/{P=1;} {if (P) print;}' | grep -v '^###' >>$@
+
+rules: contrib/$(RULESFILE)
