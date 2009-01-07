@@ -1,0 +1,20 @@
+# r5u87x-loader.rules - udev rules for loading firmware into Ricoh R5U87x USB video devices
+###
+### This file is processed by the debian rules to create the final file. Each
+### USB id gets its own line as defined by the section between BEGINTEMPLATE
+### and ENDTEMPLATE. In the template, the strings #VENDORID# and #PRODUCTID#
+### are replaced by their values. This template line is repeated for each
+### USB for which there is a file in the directory ucode/.
+###
+### Lines starting with three hashes are removed from this file.
+###
+
+ACTION!="add", GOTO="r5u87x_rules_end"
+SUBSYSTEM!="usb", GOTO="r5u87x_rules_end"
+
+###BEGINTEMPLATE###
+SYSFS{idVendor}=="#VENDORID#", SYSFS{idProduct}=="#PRODUCTID#", RUN+="/usr/sbin/r5u87x-loader --reload"
+###ENDTEMPLATE###
+
+LABEL="r5u87x_rules_end"
+# vim: ft=conf
