@@ -22,7 +22,7 @@ libdir=/lib
 FIRMWARE_DIR=$(INSTALL_PATH)$(libdir)/r5u87x/ucode
 
 # For rules and make targets -------------------------------------------------|
-RULESFILE=90-r5u87x-loader.rules
+RULESFILE=contrib/90-r5u87x-loader.rules
 
 # Automake targets -----------------------------------------------------------|
 
@@ -37,8 +37,8 @@ loader: loader.o
 clean:
 	rm -fr *.o loader
 	rm -fr *.gch loader
-	if [ -f contrib/$(RULESFILE) ]; then \
-	    rm -f contrib/$(RULESFILE); \
+	if [ -f $(RULESFILE) ]; then \
+	    rm -f $(RULESFILE); \
     fi
 
 install: all
@@ -51,7 +51,7 @@ install: all
 	done
 	
 	## If we have the rules file generated, install it while we're here
-	if [ -f contrib/$(RULESFILE) ]; then \
+	if [ -f $(RULESFILE) ]; then \
 		$(INSTALL) -m 0644 $(RULESFILE) $(UDEV_INSTALL); \
 	fi
 
@@ -59,11 +59,11 @@ uninstall:
 	rm -fv $(INSTALL_PATH)$(sbindir)/$(LOADER_INSTALL)
 	rm -rfv $(INSTALL_PATH)$(libdir)/r5u87x
 
-contrib/$(RULESFILE):
-	cat contrib/$(RULESFILE).in | awk 'BEGIN{P=1;}/^###BEGINTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' >$@
+$(RULESFILE):
+	cat $(RULESFILE).in | awk 'BEGIN{P=1;}/^###BEGINTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' >$@
 	for sedline in `ls ucode | sed 's/^r5u87x-\([0-9a-zA-Z]\+\)-\([0-9a-zA-Z]\+\)\.fw$$/s\/#VENDORID#\/\1\/g;s\/#PRODUCTID#\/\2\/g/p;d'`; do \
-		cat contrib/$(RULESFILE).in | awk 'BEGIN{P=0;}/^###BEGINTEMPLATE###/{P=1;}/^###ENDTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' | sed "$$sedline" >>$@; \
-		done >>$(RULESFILE)
-	cat contrib/$(RULESFILE).in | awk 'BEGIN{P=0;}/^###ENDTEMPLATE###/{P=1;} {if (P) print;}' | grep -v '^###' >>$@
+		cat $(RULESFILE).in | awk 'BEGIN{P=0;}/^###BEGINTEMPLATE###/{P=1;}/^###ENDTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' | sed "$$sedline" >>$@; \
+		done >>$@
+	cat $(RULESFILE).in | awk 'BEGIN{P=0;}/^###ENDTEMPLATE###/{P=1;} {if (P) print;}' | grep -v '^###' >>$@
 
-rules: contrib/$(RULESFILE)
+rules: $(RULESFILE)
