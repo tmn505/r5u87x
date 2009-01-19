@@ -301,14 +301,12 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
     
     loader_msg ("Found camera: %04x:%04x\n", dev->descriptor.idVendor,
         dev->descriptor.idProduct);
-    //loader_msg ("Firmware: %s\n\n", firmware);
     
     // Open the firmware file
-    if ((fd = g_open (firmware, O_RDONLY)) != -1) {
+    if ((fd = g_open (firmware, O_RDONLY)) < 0) {
         #ifdef UCODE_PATH
         firmware = usb_id_printf (UCODE_PATH, dev);
-        //loader_msg ("Trying %s\n", firmware);
-        if ((fd = g_open (firmware, O_RDONLY)) == -1) {
+        if ((fd = g_open (firmware, O_RDONLY)) < 0) {
             loader_error ("Failed to open %s. Does it exist?\n", firmware);
         }
         #else
@@ -319,7 +317,7 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
     // Possibly not the best way to do this, but hey, it's certainly easy
     // (without loading everything into memory, and compared to seeking around)
     if (stat (firmware, &infobuf) == -1) {
-        loader_error ("Failed to get filesize of firmware.\n");
+        loader_error ("Failed to get filesize of firmware (%s).\n", firmware);
     }
     
     // Try the USB device too.
