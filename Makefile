@@ -7,7 +7,7 @@ INCS=`pkg-config --cflags glib-2.0 libusb`
 INSTALL=install
 
 # FW data
-FIRMWARE_NAMESPEC="r5u87x-%vid%-%pid%.fw"
+FIRMWARE_NAMESPEC=r5u87x-%vid%-%pid%.fw
 FIRMWARE=`ls ucode | xargs`
 
 # Install names
@@ -19,7 +19,7 @@ PREFIX=/usr
 INSTALL_PATH=$(DESTDIR)$(PREFIX)
 sbindir=/sbin
 libdir=/lib
-FIRMWARE_DIR=$(INSTALL_PATH)$(libdir)/r5u87x/ucode
+firmdir=$(libdir)/r5u87x/ucode
 
 # For rules and make targets -------------------------------------------------|
 RULESFILE=contrib/90-r5u87x-loader.rules
@@ -27,7 +27,7 @@ RULESFILE=contrib/90-r5u87x-loader.rules
 # Automake targets -----------------------------------------------------------|
 
 .c.o:
-	$(CC) -g -Wall -DHAVE_CONFIG_H -DUCODE_PATH=\"$(FIRMWARE_DIR)/$(FIRMWARE_NAMESPEC)\" $(CFLAGS) $(INCS) -c $*.c $*.h
+	$(CC) -g -Wall -DHAVE_CONFIG_H -DUCODE_PATH=\"$(PREFIX)$(firmdir)/$(FIRMWARE_NAMESPEC)\" $(CFLAGS) $(INCS) -c $*.c $*.h
 
 all: loader
 
@@ -43,16 +43,18 @@ clean:
 
 install: all
 	$(INSTALL) -d $(INSTALL_PATH)$(bindir)
+	$(INSTALL) -d $(INSTALL_PATH)$(sbindir)
 	$(INSTALL) -m 0755 loader $(INSTALL_PATH)$(sbindir)/$(LOADER_INSTALL)
-	$(INSTALL) -d $(FIRMWARE_DIR)
+	$(INSTALL) -d $(INSTALL_PATH)$(firmdir)
 	@for fw in $(FIRMWARE); do \
-		echo "$(INSTALL) -m 0644 ucode/$$fw $(FIRMWARE_DIR)/$$fw" ; \
-		$(INSTALL) -m 0644 ucode/$$fw $(FIRMWARE_DIR)/$$fw || exit 1 ; \
+		echo "$(INSTALL) -m 0644 ucode/$$fw $(INSTALL_PATH)$(firmdir)/$$fw" ; \
+		$(INSTALL) -m 0644 ucode/$$fw $(INSTALL_PATH)$(firmdir)/$$fw || exit 1 ; \
 	done
 	
 	## If we have the rules file generated, install it while we're here
 	if [ -f $(RULESFILE) ]; then \
-		$(INSTALL) -m 0644 $(RULESFILE) $(UDEV_INSTALL); \
+		$(INSTALL) -d $(DESTDIR)$(UDEV_INSTALL); \
+		$(INSTALL) -m 0644 $(RULESFILE) $(DESTDIR)$(UDEV_INSTALL); \
 	fi
 
 uninstall:
