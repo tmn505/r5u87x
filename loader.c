@@ -100,7 +100,8 @@ find_device (const struct device_info devices[], gint *version) {
             do {
                 devinfo = devices[i];
                 if (dev->descriptor.idVendor == devinfo.usb_vendor &&
-                    dev->descriptor.idProduct == devinfo.usb_product) {
+                    dev->descriptor.idProduct == devinfo.usb_product &&
+                    dev->descriptor.idVendor != 0) {
                     
                     *version = devinfo.ucode_version;
                     return dev;
