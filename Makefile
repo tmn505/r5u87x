@@ -30,10 +30,13 @@ RULESFILE=contrib/90-r5u87x-loader.rules
 .c.o:
 	$(CC) -g -Wall -DHAVE_CONFIG_H -DUCODE_PATH=\"$(UCODE_PATH)\" $(CFLAGS) $(INCS) -c $*.c $*.h
 
-all: loader
+all: loader fw-extract
 
 loader: loader.o
 	$(CC) -g -Wall $(CFLAGS) -o $@ loader.o $(LIBS)
+	
+fw-extract:
+	$(CC) -g -Wall -DDEBUG $(CFLAGS) -o $@ fw-extract.c
 
 clean:
 	rm -fr *.o loader
