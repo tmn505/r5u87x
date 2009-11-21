@@ -1,5 +1,5 @@
 R5U87x Userspace Tools
-Version 0.2.0, 2009/01/07
+Version 0.2.1, 2009/11/22
 
 Introduction
 ============
@@ -26,11 +26,24 @@ installed:
  * libusb development packages (libusb-dev or similar)
  * GLib 2.0 development packages (libglib2.0-dev or similar)
 
-Compilation itself is reasonably simple; just run make:
- $ make
- 
-Installation
-============
+Quickstart
+==========
+
+Ubuntu
+	$ sudo apt-get install libglib2.0-dev libusb-dev build-essential gcc automake mercurial
+	$ hg clone http://bitbucket.org/ahixon/r5u87x/
+	$ cd r5u87x
+	$ make; make rules
+	$ sudo make install
+	$ sudo r5u87x-loader --reload
+	
+	r5u87x-loader will automatically be run on boot when it detects your webcam.
+
+Installation from source
+========================
+
+Simply install the dependencies required above on your system, then run
+'make'.
 
 If you'd like your system to automatically load the firmware to the camera,
 and then reload the uvcvideo module at boot time, simply run:
@@ -75,9 +88,11 @@ can, however, subscribe to any of these tickets):
    only *ONE* device, not both) - http://bitbucket.org/ahixon/r5u87x/issue/26/
  * Upside down video - http://www.bitbucket.org/ahixon/r5u87x/issue/7/
 
-If /dev/video does not exist or applications don't detect a webcam, even though
-the loader reported that the firmware was uploaded fine, please report a bug
-with [WDM OK] in the title.
+Please note WDM devices WILL NOT WORK.
+You can check what type of model you have by looking at the model chart found
+in docs/model_matrix.txt. If you're running a WDM based device, you can try to
+look on the internet for a patched version of r5u870, however it will probably
+not work with more recent kernels.
 
 You should also register, otherwise you may not get notifications of any
 replies to your bug.
