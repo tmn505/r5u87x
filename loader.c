@@ -35,6 +35,9 @@
 #include "config.h"
 #endif
 
+#define R5U870_REG_VFLIP_EX	0x30
+#define R5U870_REG_HFLIP_EX	0x31
+
 static gchar    *firmware       = "ucode/r5u87x-%vid%-%pid%.fw";
 static gboolean force_clear     = FALSE;
 static gboolean no_load         = FALSE;
@@ -86,8 +89,9 @@ replace_str(gchar *str, gchar *orig, gchar *rep)
 }
 
 struct usb_device *
-find_device (const struct device_info devices[], gint *version) {
-    struct device_info devinfo;
+find_device (const struct device_info devices[],
+	     const struct device_info **info) {
+    const struct device_info *devinfo;
     gint i = 0;
     struct usb_bus *busses;
     struct usb_bus *bus;
@@ -98,23 +102,45 @@ find_device (const struct device_info devices[], gint *version) {
         
         for (dev = bus->devices; dev; dev = dev->next) {
             do {
-                devinfo = devices[i];
-                if (dev->descriptor.idVendor == devinfo.usb_vendor &&
-                    dev->descriptor.idProduct == devinfo.usb_product &&
+                devinfo = &devices[i];
+                if (dev->descriptor.idVendor == devinfo->usb_vendor &&
+                    dev->descriptor.idProduct == devinfo->usb_product &&
                     dev->descriptor.idVendor != 0) {
                     
-                    *version = devinfo.ucode_version;
+		    *info = devinfo;
                     return dev;
                 }
                 
                 i++;
-            } while (devinfo.usb_vendor != 0);
+            } while (devinfo->usb_vendor != 0);
             
             i = 0;
         }
     }
     
     return NULL;
+}
+
+gint
+r5u87x_image_flip(struct usb_dev_handle *handle, gboolean hflip,
+		  gboolean vflip) {
+    gint res;
+
+    res = usb_control_msg (handle, USB_SEND, 0xc2, hflip, R5U870_REG_HFLIP_EX,
+                NULL, 0, TIMEOUT);
+    if (res < 0) {
+        loader_warn ("Unable to set hflip to %u; res: %d\n", hflip, res);
+        return res;
+    }
+
+    res = usb_control_msg (handle, USB_SEND, 0xc2, vflip, R5U870_REG_VFLIP_EX,
+                NULL, 0, TIMEOUT);
+    if (res < 0) {
+        loader_warn ("Unable to set vflip to %u; res: %d\n", vflip, res);
+        return res;
+    }
+
+    return 0;
 }
 
 gint
@@ -288,9 +314,9 @@ usb_id_printf (gchar* src, struct usb_device *dev) {
 }
 
 gint
-load_firmware (struct usb_device *dev, const gint ucode_version) {
+load_firmware (struct usb_device *dev, usb_dev_handle *handle,
+               const struct device_info *devinfo) {
     gint fd, res, dev_version;
-    usb_dev_handle *handle;
     struct stat infobuf;
 
     dev_version = 0;
@@ -321,11 +347,6 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
         loader_error ("Failed to get filesize of firmware (%s).\n", firmware);
     }
     
-    // Try the USB device too.
-    if (!(handle = usb_open (dev))) {
-        loader_warn ("Failed to open USB device.\n");
-    }
-    
     // Check to see if there's already stuff on there.
     res = r5u87x_ucode_status (handle);
     if (res < 0) {
@@ -341,7 +362,8 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
         
         if (res < 0) {
             return res;
-        } else if (dev_version != ucode_version && dev_version != 0x0001) {
+        } else if (dev_version != devinfo->ucode_version &&
+		   dev_version != 0x0001) {
             // Clear it out - ucode version and device version don't match.
             loader_warn ("Microcode versions don't match, clearing.\n");
             res = r5u87x_ucode_clear (handle);
@@ -394,9 +416,9 @@ load_firmware (struct usb_device *dev, const gint ucode_version) {
         res = r5u87x_ucode_version (handle, &dev_version);
         if (res < 0) {
             return res;
-        } else if (dev_version != ucode_version) {
+        } else if (dev_version != devinfo->ucode_version) {
             loader_warn ("Camera returned unexpected ucode version 0x%04x - "
-                "expected 0x%04x\n", dev_version, ucode_version);
+                "expected 0x%04x\n", dev_version, devinfo->ucode_version);
             return -EBADMSG;
         }
     } else {
@@ -411,8 +433,9 @@ gint
 main (gint argc, gchar *argv []) {
     GOptionContext *context;
     GError *error = NULL;
+    const struct device_info *devinfo;
     struct usb_device *dev;
-    gint version = 0;
+    usb_dev_handle *handle;
     
     g_set_prgname ("loader");
     context = g_option_context_new("- Ricoh R5U87x series firmware loader");
@@ -437,13 +460,17 @@ main (gint argc, gchar *argv []) {
     
     loader_msg ("Searching for device...\n");
     
-    dev = find_device (device_table, &version);
+    dev = find_device (device_table, &devinfo);
     
     if (dev == NULL) {
         loader_error ("Failed to find any supported webcams.\n");
     }
     
-    int res = load_firmware (dev, version);
+    if (!(handle = usb_open (dev))) {
+        loader_error ("Failed to open USB device.\n");
+    }
+    
+    int res = load_firmware (dev, handle, devinfo);
     if (res < 0) {
         loader_error ("Failed to upload firmware to device: %s (code %d).\n%s",
             strerror (errno), res,
@@ -453,6 +480,7 @@ main (gint argc, gchar *argv []) {
             dev->descriptor.idVendor, dev->descriptor.idProduct);
     }
     
+    r5u87x_image_flip (handle, devinfo->hflip, devinfo->vflip);
     
     if (reload) {
         gint status;

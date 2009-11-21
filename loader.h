@@ -36,38 +36,41 @@ struct device_info {
     int usb_vendor;
     int usb_product;
     int ucode_version;
+    int hflip;
+    int vflip;
 };
 
 struct usb_device*
-find_device (const struct device_info devices[], gint *version);
+find_device (const struct device_info devices[],
+	     const struct device_info **info);
 
 /*
  * Please try to keep this in sync with docs/model_matrix.txt and
  * docs/firmware_matrix.txt
  */
 static const struct device_info device_table[] = {
-    { 0x05CA, 0x1803, 0xFFFF }, // Unknown ucode version.
-    { 0x05CA, 0x1810, 0x0115 },
+    { 0x05CA, 0x1803, 0xFFFF, 0, 0 }, // Unknown ucode version.
+    { 0x05CA, 0x1810, 0x0115, 0, 0 },
     /* 05ca:1812 does not require ucode. */
-    { 0x05CA, 0x1830, 0x0100 },
-    { 0x05CA, 0x1832, 0x0100 },
-    { 0x05CA, 0x1833, 0x0100 },
-    { 0x05CA, 0x1834, 0x0111 },
-    { 0x05CA, 0x1835, 0x0107 },
-    { 0x05CA, 0x1836, 0x0115 },
-    { 0x05CA, 0x1837, 0x0115 }, // Uses copy of 0x1836 ucode.
-    { 0x05CA, 0x1839, 0x0030 },
-    { 0x05CA, 0x183a, 0x0111 },
-    { 0x05CA, 0x183b, 0x0131 },
-    { 0x05CA, 0x183e, 0x0100 },
-    { 0x05CA, 0x1841, 0x0103 },
+    { 0x05CA, 0x1830, 0x0100, 0, 0 },
+    { 0x05CA, 0x1832, 0x0100, 0, 0 },
+    { 0x05CA, 0x1833, 0x0100, 0, 0 },
+    { 0x05CA, 0x1834, 0x0111, 0, 0 },
+    { 0x05CA, 0x1835, 0x0107, 0, 0 },
+    { 0x05CA, 0x1836, 0x0115, 0, 0 },
+    { 0x05CA, 0x1837, 0x0115, 1, 1 }, // Uses copy of 0x1836 ucode.
+    { 0x05CA, 0x1839, 0x0030, 0, 0 },
+    { 0x05CA, 0x183a, 0x0111, 0, 0 },
+    { 0x05CA, 0x183b, 0x0131, 0, 0 },
+    { 0x05CA, 0x183e, 0x0100, 0, 0 },
+    { 0x05CA, 0x1841, 0x0103, 0, 0 },
     
     /*
      * These have been commented out because we don't have the routines
      * to determine which is which yet.
      * 
-     * { 0x05CA, 0x1870, 0x0100 },  // Used for HP Webcam 1000      (1870_1.fw)
-     * { 0x05CA, 0x1870, 0x0112 },  // Used for HP Pavilion dv1xxxx (1870.fw)
+     * { 0x05CA, 0x1870, 0x0100, 0, 0 },  // Used for HP Webcam 1000      (1870_1.fw)
+     * { 0x05CA, 0x1870, 0x0112, 0, 0 },  // Used for HP Pavilion dv1xxxx (1870.fw)
      */
      
      { }
