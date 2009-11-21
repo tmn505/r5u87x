@@ -38,7 +38,10 @@
 #define R5U870_REG_VFLIP_EX	0x30
 #define R5U870_REG_HFLIP_EX	0x31
 
-static gchar    *firmware       = "ucode/r5u87x-%vid%-%pid%.fw";
+static gchar    *firmware       = "ucode/r5u87x-%vid%-%pid%.fw";	// relative path to firmware files
+                                                                    // if files are not found here, loader will look
+                                                                    // in UCODE_PATH for files - defined in Makefile
+                                                                    // and config.h
 static gboolean force_clear     = FALSE;
 static gboolean no_load         = FALSE;
 

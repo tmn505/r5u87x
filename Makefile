@@ -20,6 +20,7 @@ INSTALL_PATH=$(DESTDIR)$(PREFIX)
 sbindir=/sbin
 libdir=/lib
 firmdir=$(libdir)/r5u87x/ucode
+UCODE_PATH=$(PREFIX)$(firmdir)/$(FIRMWARE_NAMESPEC)
 
 # For rules and make targets -------------------------------------------------|
 RULESFILE=contrib/90-r5u87x-loader.rules
@@ -27,7 +28,7 @@ RULESFILE=contrib/90-r5u87x-loader.rules
 # Automake targets -----------------------------------------------------------|
 
 .c.o:
-	$(CC) -g -Wall -DHAVE_CONFIG_H -DUCODE_PATH=\"$(PREFIX)$(firmdir)/$(FIRMWARE_NAMESPEC)\" $(CFLAGS) $(INCS) -c $*.c $*.h
+	$(CC) -g -Wall -DHAVE_CONFIG_H -DUCODE_PATH=\"$(UCODE_PATH)\" $(CFLAGS) $(INCS) -c $*.c $*.h
 
 all: loader
 
