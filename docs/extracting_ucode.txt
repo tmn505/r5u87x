@@ -5,6 +5,9 @@ In the root directory of this project, there is a tool called 'recode-fw.scm'.
 This is a Guile script that takes a Windows driver file and attempts to extract
 the camera microcode from it.
 
+You might also want to look at docs/disasemble_ucode.txt for information on how
+to compile the fw-extract tool, as well.
+
 Arguments & running
 ===================
 
