@@ -37,7 +37,7 @@ Ubuntu
 	$ sudo make install
 	$ sudo r5u87x-loader --reload
 	
-	r5u87x-loader will automatically be run on boot when it detects your webcam.
+	The loader will automatically be run on boot when it detects your webcam.
 
 Installation from source
 ========================
@@ -51,13 +51,16 @@ and then reload the uvcvideo module at boot time, simply run:
  
 Now you can proceed to installing the tool system-wide:
  # make install
+ 
+Please note that the loader is installed system-wide as 'r5u87x-loader', but
+compiles as just 'loader'.
 
 Usage
 =====
 
 To upload the firmware to your camera, simply run (possibly as root, depending
 on your system):
-  # r5u87x-loader
+  # loader
 
 Do note that this only lasts while the camera still has power to it. Shutting
 down and starting up again will cause the camera to lose its state. Rebooting,
@@ -66,14 +69,14 @@ however, won't.
 You may need to reload your kernel module (eg. uvcvideo) for it to notice your
 camera now that it has firmware. You can either get the loader tool to do this
 when it's finished:
-  # r5u87x-loader --reload
+  # loader --reload
 
 at boot time, by following the instructions above (see Installation), or by
 performing it manually:
   # modprobe -r uvcvideo; modprobe uvcvideo
 
 If your camera appears to be playing up, you can try forcefully resetting it:
-  # r5u87x-loader --force-clear
+  # loader --force-clear
 
 There are also useful arguments for testing, see doc/extracting_ucode.txt
 
