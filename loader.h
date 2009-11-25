@@ -63,7 +63,7 @@ static const struct device_info device_table[] = {
     { 0x05CA, 0x183a, 0x0111, 0, 0 },
     { 0x05CA, 0x183b, 0x0131, 0, 0 },
     { 0x05CA, 0x183e, 0x0100, 0, 0 },
-    { 0x05CA, 0x1841, 0x0103, 0, 0 },
+    { 0x05CA, 0x1841, 0x0103, 1, 1 },
     
     /*
      * These have been commented out because we don't have the routines
