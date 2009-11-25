@@ -66,10 +66,23 @@ uninstall:
 	rm -rfv $(INSTALL_PATH)$(libdir)/r5u87x
 
 $(RULESFILE):
-	cat $(RULESFILE).in | awk 'BEGIN{P=1;}/^###BEGINTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' >$@
+	# extract preamble from template
+	cat $(RULESFILE).in | \
+		awk 'BEGIN{P=1;}/^###BEGINTEMPLATE###/{P=0;} {if (P) print;}' \
+		| grep -v '^###' >$@
+	# process template for each firmware file
+	# loader is part of regexp REPL_LOADER has escaped slashes (to work for simple paths)
 	for sedline in `ls ucode | sed 's/^r5u87x-\([0-9a-zA-Z]\+\)-\([0-9a-zA-Z]\+\)\.fw$$/s\/#VENDORID#\/\1\/g;s\/#PRODUCTID#\/\2\/g/p;d'`; do \
-		cat $(RULESFILE).in | awk 'BEGIN{P=0;}/^###BEGINTEMPLATE###/{P=1;}/^###ENDTEMPLATE###/{P=0;} {if (P) print;}' | grep -v '^###' | sed "$$sedline" >>$@; \
+		REPL_LOADER=$$(echo "$(PREFIX)$(sbindir)/$(LOADER_INSTALL)" | sed 's/\//\\\//g'); \
+		cat $(RULESFILE).in | \
+			awk 'BEGIN{P=0;}/^###BEGINTEMPLATE###/{P=1;}/^###ENDTEMPLATE###/{P=0;} {if (P) print;}' | \
+			grep -v '^###' | \
+			sed -e "$$sedline" \
+			    -e "s/#LOADER#/$$REPL_LOADER/g" >>$@; \
 		done >>$@
-	cat $(RULESFILE).in | awk 'BEGIN{P=0;}/^###ENDTEMPLATE###/{P=1;} {if (P) print;}' | grep -v '^###' >>$@
+	# extract postscript from template
+	cat $(RULESFILE).in | \
+		awk 'BEGIN{P=0;}/^###ENDTEMPLATE###/{P=1;} {if (P) print;}' \
+		| grep -v '^###' >>$@
 
 rules: $(RULESFILE)
