@@ -13,7 +13,7 @@ ACTION!="add", GOTO="r5u87x_rules_end"
 SUBSYSTEM!="usb", GOTO="r5u87x_rules_end"
 
 ###BEGINTEMPLATE###
-SYSFS{idVendor}=="#VENDORID#", SYSFS{idProduct}=="#PRODUCTID#", RUN+="#LOADER# --reload"
+ATTRS{idVendor}=="#VENDORID#", ATTRS{idProduct}=="#PRODUCTID#", RUN+="#LOADER# --reload"
 ###ENDTEMPLATE###
 
 LABEL="r5u87x_rules_end"
